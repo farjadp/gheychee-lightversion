@@ -10,16 +10,17 @@ require('dotenv').config();
 const config = {
   // Bot Token from Telegram Father
   BOT_TOKEN: process.env.BOT_TOKEN,
-  
+
   // Port for the Express server (Webhook/Health checks)
   PORT: process.env.PORT || 3000,
-  
-  // App URL for Webhook setting (Phase 2 mostly)
+
+  // App URL for Webhook setting (Required in Production)
+  // Example: https://gheychee-lightversion-xyz.run.app
   APP_URL: process.env.APP_URL,
-  
+
   // Node Environment
   NODE_ENV: process.env.NODE_ENV || 'development',
-  
+
   // Supported Platforms Enum
   PLATFORMS: {
     INSTAGRAM: 'INSTAGRAM',
