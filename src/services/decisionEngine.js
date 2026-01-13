@@ -65,7 +65,8 @@ const processRequest = async (text) => {
         console.error('[DecisionEngine] Error processing request:', error);
         return {
             status: RESULT_TYPES.ERROR,
-            message: error.message || 'An internal error occurred while processing your request.'
+            message: error.message || 'An internal error occurred while processing your request.',
+            data: error.message // Pass error to data so handlers.js can display it
         };
     }
 };

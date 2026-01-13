@@ -26,10 +26,14 @@ const start = async () => {
                 throw new Error('APP_URL is required for Production Webhooks!');
             }
 
-            // Set the webhook with Telegram
+            // Set the webhook with Telegram (Async - don't block server start)
             const webhookUrl = `${config.APP_URL}/webhook`;
-            await bot.telegram.setWebhook(webhookUrl);
-            console.log(`[Bot] Webhook set to: ${webhookUrl}`);
+            console.log(`[Bot] Setting webhook to: ${webhookUrl}`);
+
+            // Promise-based - allows the server (app.listen) to start immediately
+            bot.telegram.setWebhook(webhookUrl)
+                .then(() => console.log(`[Bot] Webhook successfully set!`))
+                .catch(err => console.error(`[Bot] Failed to set webhook:`, err));
 
             // Attach webhook handler to Express
             // This grabs updates from POST /webhook
@@ -39,12 +43,12 @@ const start = async () => {
             // --- Development: Polling ---
             console.log('[Bot] Starting in DEVELOPMENT (Polling) mode...');
 
-            // Clear any previous webhooks so polling works
-            await bot.telegram.deleteWebhook();
-
-            bot.launch(() => {
-                console.log('[Bot] Polling started');
-            });
+            // Async delete webhook
+            bot.telegram.deleteWebhook()
+                .then(() => {
+                    bot.launch(() => console.log('[Bot] Polling started'));
+                })
+                .catch(console.error);
         }
 
         // 4. Start Server
