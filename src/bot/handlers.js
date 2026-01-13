@@ -67,7 +67,7 @@ const handleMessage = async (ctx) => {
             break;
 
         case RESULT_TYPES.ERROR:
-            await ctx.reply('🚫 Something went wrong. Please try again later.');
+            await ctx.reply(`🚫 Error: ${result.data}`);
             break;
 
         default:
