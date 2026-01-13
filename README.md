@@ -19,8 +19,8 @@ A lightweight, modular Telegram bot for downloading open-source videos, designed
 
 1.  **Clone the repo**:
     ```bash
-    git clone https://github.com/your-repo/gheychee-bot.git
-    cd gheychee-bot
+    git clone https://github.com/farjadp/gheychee-lightversion.git
+    cd gheychee-lightversion
     ```
 
 2.  **Install Dependencies**:

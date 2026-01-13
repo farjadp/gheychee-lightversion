@@ -7,15 +7,14 @@
 
 # 1. Use a base image that has Python (easier to install Node on it or vice versa)
 # We use Python 3.11-slim as base to ensure reliable yt-dlp support
-FROM python:3.11-slim
+# 1. Use Node.js as the primary base image
+FROM node:18-slim
 
-# 2. Install Node.js (Version 18 or 20)
-# We use curl to fetch the setup script
+# 2. Install Python 3 and dependencies for yt-dlp
+# We need python3 for yt-dlp to run.
 RUN apt-get update && apt-get install -y \
-    curl \
-    gnupg \
-    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs \
+    python3 \
+    python3-pip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -26,14 +25,12 @@ WORKDIR /app
 COPY package*.json ./
 
 # 5. Install Node Dependencies
-# --omit=dev keeps it light for production
 RUN npm ci --omit=dev
 
 # 6. Copy Source Code
 COPY . .
 
 # 7. Environment Variables
-# These should be overridden by Cloud Run secrets, but defaults help
 ENV NODE_ENV=production
 ENV PORT=3000
 

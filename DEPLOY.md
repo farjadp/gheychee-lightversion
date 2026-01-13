@@ -14,18 +14,18 @@ Run the following command in your terminal.
 Replace `YOUR_PROJECT_ID` with your actual project ID and `YOUR_BOT_TOKEN` with your Telegram Bot Token.
 
 ```bash
-gcloud run deploy gheychee-bot \
+gcloud run deploy gheychee-lightversion \
   --source . \
-  --project=YOUR_PROJECT_ID \
+  --project=gheychee-lightversion \
   --region=europe-west1 \
   --allow-unauthenticated \
-  --set-env-vars BOT_TOKEN="YOUR_BOT_TOKEN",NODE_ENV="production"
+  --set-env-vars NODE_ENV=production,APP_URL=https://gheychee-lightversion-132929080538.europe-west1.run.app,BOT_TOKEN="7991483348:AAGFqR8shfhYg8lj_hj7Vw0AyJw3zBfHN24"
 ```
 
 ### About the Environment Variables:
--   `BOT_TOKEN`: Your secret Telegram token.
+-   `BOT_TOKEN`: Your secret Telegram token (Included in command above).
 -   `NODE_ENV="production"`: Tells the bot to switch to **Webhook Mode**.
--   `APP_URL`: **(Optional but Recommended)** If the auto-detection fails, explicitly set this to your cloud run URL (e.g., `https://gheychee-bot-xyz.run.app`).
+-   `APP_URL`: **Required**. The URL of your Cloud Run service.
 
 ## Continuous Deployment (CI/CD)
 

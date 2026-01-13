@@ -14,16 +14,24 @@ const { RESULT_TYPES } = require('../services/decisionEngine');
  */
 const handleStart = async (ctx) => {
     const welcomeMessage = `
-👋 *Welcome to the Educational Video Bot!*
+👋 *Welcome to Gheychee Lite*
 
-I can demonstrate how to process links from:
-• Instagram
-• X (Twitter)
+⚠️ *Disclaimer*
+This bot is an internal and educational tool.
+It may only be used with content that:
+• You own, or
+• You have explicit permission to use, or
+• Is legally reusable under a valid license.
+
+Ashavid makes no claim that your use of this tool is lawful and assumes no responsibility for violations of copyright, platform terms (Instagram, X, Telegram), or third-party rights.
+
+The tool is experimental and may produce errors, incomplete output, or unexpected results.
+You are responsible for verifying and using the output appropriately.
 
 *How to use:*
-Simply send me a link, and I'll process it for you.
+Simply send me an Instagram or X (Twitter) link.
 
-_Note: This is a Phase 1 Demo. No real content is downloaded._
+[Terms of Use](https://github.com/farjadp/gheychee-lightversion/blob/main/TERMS_OF_USE.md) | [Privacy Policy](https://github.com/farjadp/gheychee-lightversion/blob/main/PRIVACY_POLICY.md)
   `;
     await ctx.replyWithMarkdown(welcomeMessage);
 };
