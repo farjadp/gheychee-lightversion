@@ -42,5 +42,13 @@ A lightweight, modular Telegram bot for downloading open-source videos, designed
     npm start
     ```
 
+## About Ashavid
+**Ashavid** is a digital transformation and startup mentorship firm. We help immigrant founders build defensible businesses in Canada, not just visa applications.
+
+- 🌐 [Website](https://ashavid.ca/)
+- 🔗 [LinkedIn](https://www.linkedin.com/company/ashavid/)
+- 📺 [YouTube](https://www.youtube.com/@ashavidgroup)
+- ✖️ [X (Twitter)](https://x.com/ashavidgroup)
+
 ## Deployment
 See [DEPLOY.md](DEPLOY.md) for Google Cloud Run instructions.

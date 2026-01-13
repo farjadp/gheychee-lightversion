@@ -75,6 +75,9 @@ const getMedia = async (url, platform) => {
 خوشحال میشم نظرتون رو بگید
 
 www.ashavid.ca
+LinkedIn: https://www.linkedin.com/company/ashavid/
+YouTube: https://www.youtube.com/@ashavidgroup
+X: https://x.com/ashavidgroup
 
 و یادمون نره ما عاشق ایران هستیم و داریم با ظحاک میجنگیم. هیچ چیزی برامون با ارزش تر از ایران نیست
 به امید ایرانی آباد و آزاد
