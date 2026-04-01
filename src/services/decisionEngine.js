@@ -34,6 +34,14 @@ const RESULT_TYPES = {
  * @param {string} text - User message content
  * @returns {Promise<Object>} - Outcome object
  */
+const logger = require('./logger');
+
+/**
+ * Main processor Function.
+ * 
+ * @param {string} text - User message content
+ * @returns {Promise<Object>} - Outcome object
+ */
 const processRequest = async (text) => {
     // 1. Validate URL
     if (!isValidUrl(text)) {
@@ -54,19 +62,25 @@ const processRequest = async (text) => {
         };
     }
 
+    // Track Request (Native Stats)
+    logger.trackRequest(platform);
+
     // 4. Fetch Media (Mocked)
     try {
         const media = await mediaProvider.getMedia(text, platform);
+        logger.trackSuccess();
         return {
             status: RESULT_TYPES.SUCCESS,
             data: media
         };
     } catch (error) {
-        console.error('[DecisionEngine] Error processing request:', error);
+        // Track Error (Native Logging + Alerting)
+        await logger.trackError(error, 'DecisionEngine', text);
+
         return {
             status: RESULT_TYPES.ERROR,
             message: error.message || 'An internal error occurred while processing your request.',
-            data: error.message // Pass error to data so handlers.js can display it
+            data: error.message
         };
     }
 };

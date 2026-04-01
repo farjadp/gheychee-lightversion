@@ -1,6 +1,24 @@
 # Gheychee Video Downloader Bot ✂️
 
-A lightweight, modular Telegram bot for downloading open-source videos, designed to demonstrate Node.js backend architecture.
+A lightweight, Modular Telegram bot for downloading video content.
+
+**🤖 Live Bot**: [@gheycheelight_bot](https://t.me/gheycheelight_bot)
+
+---
+
+### ⚠️ Disclaimer (Internal Use)
+**This bot is an internal and educational tool.**
+It may only be used with content that:
+*   You own, or
+*   You have explicit permission to use, or
+*   Is legally reusable under a valid license.
+
+Ashavid makes no claim that your use of this tool is lawful and assumes no responsibility for violations of copyright, platform terms (Instagram, X, Telegram), or third-party rights.
+The tool is experimental and may produce errors, incomplete output, or unexpected results. You are responsible for verifying and using the output appropriately.
+
+See: [Full Terms of Use](TERMS_OF_USE.md) | [No Storage Policy](PRIVACY_POLICY.md)
+
+---
 
 ## Features
 - **URL Validation**: Handles Instagram and X (Twitter) links.

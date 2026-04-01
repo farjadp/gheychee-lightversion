@@ -8,13 +8,19 @@
 const { setupBot } = require('./bot');
 const { createServer } = require('./server');
 const config = require('./config/env');
+const logger = require('./services/logger');
+const userStore = require('./services/userStore');
 
 const start = async () => {
     try {
         // 1. Initialize Bot
         const bot = setupBot();
 
-        // 2. Initialize Server
+        // 2. Initialize Monitoring Services
+        logger.init(bot);
+        userStore.init();
+
+        // 3. Initialize Server
         const app = createServer(bot);
 
         // 3. Determine Mode (Polling vs Webhook)

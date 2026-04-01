@@ -27,6 +27,25 @@ const createServer = (bot) => {
         res.send('Telegram Bot Decision Engine is Running.');
     });
 
+    // Cloud Scheduler Endpoint (Daily Report)
+    app.post('/cron/daily-report', async (req, res) => {
+        const logger = require('./services/logger');
+        const report = logger.getAndResetStats();
+
+        if (config.ADMIN_CHAT_ID) {
+            try {
+                await bot.telegram.sendMessage(config.ADMIN_CHAT_ID, report, { parse_mode: 'Markdown' });
+                console.log('[Cron] Daily report sent via Webhook');
+                res.status(200).send('Report Sent');
+            } catch (e) {
+                console.error('[Cron] Failed to send report:', e.message);
+                res.status(500).send('Failed to send report');
+            }
+        } else {
+            res.status(200).send('No Admin Chat ID configured');
+        }
+    });
+
     // In Phase 2, we would add the webhook route here:
     // app.use(bot.webhookCallback('/secret-path'));
 

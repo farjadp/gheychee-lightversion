@@ -25,3 +25,26 @@
 
 ## Support
 For issues, contact the developer or open an issue on GitHub.
+
+---
+
+## 🛡️ For Admins: Accessing Logs
+
+### 1. Telegram Alerts (Instant)
+You will receive an **immediate message** in your Telegram Admin Chat if:
+*   Users face "Login Required" errors.
+*   The bot gets "Rate Limited" (429).
+*   The server crashes or times out.
+
+### 2. Daily Report (08:00 AM)
+Every morning, the bot sends a summary:
+*   **Total Requests**: Usage count.
+*   **Success/Fail**: Health check.
+*   **Platform Stats**: IG vs Twitter popularity.
+
+### 3. Google Cloud Logs (Full Debug)
+For deep debugging (seeing every single request), visit the Google Cloud Console:
+
+👉 **[View Live Logs](https://console.cloud.google.com/run/detail/europe-west1/gheychee-lightversion/logs?project=gheychee-lightversion)**
+
+*(Select "Logs" tab -> "Log Explorer" for advanced filtering)*

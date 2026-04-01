@@ -22,6 +22,25 @@ gcloud run deploy gheychee-lightversion \
   --set-env-vars NODE_ENV=production,APP_URL=https://gheychee-lightversion-132929080538.europe-west1.run.app,BOT_TOKEN="7991483348:AAGFqR8shfhYg8lj_hj7Vw0AyJw3zBfHN24"
 ```
 
+### Phase 7: Enable Broadcasting (Firestore)
+For the `/broadcast` command to work, your Cloud Run service needs permission to access Firebase.
+
+1.  Go to **IAM & Admin** in Google Cloud Console.
+2.  Find the service account used by Cloud Run (usually `something-compute@developer.gserviceaccount.com`).
+3.  Add the role: **Firebase Admin SDK Administrator Service Agent** (or `Cloud Datastore User`).
+
+Run this command to deploy the final version:
+
+```bash
+gcloud run deploy gheychee-lightversion \
+  --source . \
+  --project=gheychee-lightversion \
+  --region=europe-west1 \
+  --allow-unauthenticated \
+  --update-env-vars NODE_ENV=production,APP_URL=https://gheychee-lightversion-132929080538.europe-west1.run.app,BOT_TOKEN="7991483348:AAGFqR8shfhYg8lj_hj7Vw0AyJw3zBfHN24",ADMIN_CHAT_ID="425864094" \
+  --remove-env-vars SENTRY_DSN
+```
+
 ### About the Environment Variables:
 -   `BOT_TOKEN`: Your secret Telegram token (Included in command above).
 -   `NODE_ENV="production"`: Tells the bot to switch to **Webhook Mode**.

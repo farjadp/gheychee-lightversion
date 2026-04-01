@@ -1,11 +1,13 @@
 // ============================================================================
 // Hardware Source: src/services/mediaProvider.js
-// Version: 3.0.0
+// Version: 3.1.0
 // Why: Phase 3 - Use yt-dlp for reliable video extraction
+// Changelog: Removed deprecated youtubeSkipDashManifest, added Instagram cookie support
 // Env / Identity: Helper layer
 // ============================================================================
 
 const youtubedl = require('youtube-dl-exec');
+const path = require('path');
 
 /**
  * Interface definition:
@@ -23,19 +25,31 @@ const getMedia = async (url, platform) => {
     console.log(`[MediaProvider] Phase 3 Extraction for ${platform}: ${url}`);
 
     try {
-        // 1. Call yt-dlp to get JSON metadata
-        // We flags:
-        // --dump-single-json: Get JSON output
+        // 1. Build yt-dlp options
+        // --dump-single-json: Get JSON metadata only
         // --no-warnings: Clean output
         // --no-check-certificate: Avoid SSL issues in some envs
         // --prefer-free-formats: Good practice
-        const output = await youtubedl(url, {
+        const ytdlpOptions = {
             dumpSingleJson: true,
             noWarnings: true,
             noCheckCertificate: true,
-            preferFreeFormats: true,
-            youtubeSkipDashManifest: true // Helps with direct MP4 links
-        });
+            preferFreeFormats: true
+            // Note: youtubeSkipDashManifest was removed — deprecated in yt-dlp >= 2024.x
+        };
+
+        // 2. Instagram Cookie Support
+        // Instagram requires authentication for most content.
+        // Export cookies from your browser using a cookies.txt extension
+        // and set the file path in INSTAGRAM_COOKIES_FILE env var.
+        if (platform === 'INSTAGRAM' && process.env.INSTAGRAM_COOKIES_FILE) {
+            const cookiesPath = path.resolve(process.env.INSTAGRAM_COOKIES_FILE);
+            ytdlpOptions.cookies = cookiesPath;
+            console.log(`[MediaProvider] Using Instagram cookies from: ${cookiesPath}`);
+        }
+
+        // 3. Call yt-dlp
+        const output = await youtubedl(url, ytdlpOptions);
 
         // 2. Extract Data
         const title = output.title || 'No Title';
@@ -92,6 +106,17 @@ X: https://x.com/ashavidgroup
 
     } catch (error) {
         console.error(`[MediaProvider] Error:`, error.message);
+
+        // Provide user-friendly Persian error for Instagram auth issues
+        const msg = error.message || '';
+        if (platform === 'INSTAGRAM' && (msg.includes('login required') || msg.includes('rate-limit') || msg.includes('cookies'))) {
+            throw new Error(
+                '⚠️ اینستاگرام در حال حاضر برای دانلود این محتوا نیاز به لاگین دارد.\n' +
+                'این مشکل از طرف اینستاگرام هست و ربطی به بات نداره.\n' +
+                'لینک دیگه ای امتحان کنید یا کمی بعد دوباره تلاش کنید. 🔄'
+            );
+        }
+
         throw new Error(`Failed to download media: ${error.message || 'Unknown error'}`);
     }
 };

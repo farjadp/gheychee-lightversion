@@ -1,7 +1,8 @@
 // ============================================================================
 // Hardware Source: src/config/env.js
-// Version: 1.0.0
+// Version: 1.1.0
 // Why: Centralize environment variables and configuration constants
+// Changelog: Added INSTAGRAM_COOKIES_FILE for yt-dlp auth support
 // Env / Identity: uses process.env
 // ============================================================================
 
@@ -26,7 +27,17 @@ const config = {
     INSTAGRAM: 'INSTAGRAM',
     TWITTER: 'TWITTER', // X
     UNKNOWN: 'UNKNOWN'
-  }
+  },
+
+  // Monitoring
+  // SENTRY_DSN Removed (Native Logging only)
+  ADMIN_CHAT_ID: process.env.ADMIN_CHAT_ID,
+
+  // Instagram Cookie File Path (Optional)
+  // Export cookies from browser using a Netscape-format cookies.txt extension.
+  // Required for downloading private or rate-limited Instagram content via yt-dlp.
+  // Example: /app/cookies/instagram.txt
+  INSTAGRAM_COOKIES_FILE: process.env.INSTAGRAM_COOKIES_FILE || null
 };
 
 // Validate critical config
