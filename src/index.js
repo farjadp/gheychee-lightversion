@@ -1,15 +1,40 @@
 // ============================================================================
 // Hardware Source: src/index.js
-// Version: 1.0.0
+// Version: 1.1.0
 // Why: Main Entry Point. Starts Bot and Server.
+// Changelog: Auto-decode INSTAGRAM_COOKIES_BASE64 into /tmp at startup
 // Env / Identity: Application root
 // ============================================================================
 
+const fs = require('fs');
+const path = require('path');
 const { setupBot } = require('./bot');
 const { createServer } = require('./server');
 const config = require('./config/env');
 const logger = require('./services/logger');
 const userStore = require('./services/userStore');
+
+// ---------------------------------------------------------------------------
+// Instagram Cookie Bootstrap
+// If INSTAGRAM_COOKIES_BASE64 is set (Cloud Run / production),
+// decode it and write to /tmp so yt-dlp can use it as a cookies file.
+// ---------------------------------------------------------------------------
+const bootstrapInstagramCookies = () => {
+    const b64 = process.env.INSTAGRAM_COOKIES_BASE64;
+    if (!b64) return;
+
+    const tmpPath = '/tmp/instagram_cookies.txt';
+    try {
+        const decoded = Buffer.from(b64, 'base64').toString('utf-8');
+        fs.writeFileSync(tmpPath, decoded, 'utf-8');
+        process.env.INSTAGRAM_COOKIES_FILE = tmpPath;
+        console.log('[Bootstrap] Instagram cookies written to', tmpPath);
+    } catch (err) {
+        console.error('[Bootstrap] Failed to write Instagram cookies:', err.message);
+    }
+};
+
+bootstrapInstagramCookies();
 
 const start = async () => {
     try {
