@@ -109,11 +109,21 @@ X: https://x.com/ashavidgroup
         };
 
     } catch (error) {
-        console.error(`[MediaProvider] Error:`, error.message);
-
-        // Provide user-friendly Persian error for Instagram auth issues
+        // Capture full error details including yt-dlp stderr
         const msg = error.message || '';
-        if (platform === 'INSTAGRAM' && (msg.includes('login required') || msg.includes('rate-limit') || msg.includes('cookies'))) {
+        const stderr = error.stderr || '';
+        const fullError = [msg, stderr].filter(Boolean).join(' | ');
+        console.error(`[MediaProvider] Error:`, fullError);
+        console.error(`[MediaProvider] ytdlp binary: ${process.env.YTDLP_PATH || 'yt-dlp (fallback)'}`);
+        console.error(`[MediaProvider] cookies file: ${process.env.INSTAGRAM_COOKIES_FILE || 'not set'}`);
+
+        // Binary not found
+        if (msg.includes('ENOENT') || msg.includes('not found')) {
+            throw new Error(`Failed to download media: yt-dlp binary not found at ${process.env.YTDLP_PATH || 'yt-dlp'}`);
+        }
+
+        // Instagram authentication issues
+        if (platform === 'INSTAGRAM' && (fullError.includes('login required') || fullError.includes('rate-limit') || fullError.includes('cookies') || fullError.includes('HTTP Error 401') || fullError.includes('HTTP Error 403'))) {
             throw new Error(
                 '⚠️ اینستاگرام در حال حاضر برای دانلود این محتوا نیاز به لاگین دارد.\n' +
                 'این مشکل از طرف اینستاگرام هست و ربطی به بات نداره.\n' +
@@ -121,7 +131,7 @@ X: https://x.com/ashavidgroup
             );
         }
 
-        throw new Error(`Failed to download media: ${error.message || 'Unknown error'}`);
+        throw new Error(`Failed to download media: ${fullError || 'Unknown error'}`);
     }
 };
 
