@@ -1,13 +1,17 @@
 // ============================================================================
 // Hardware Source: src/services/mediaProvider.js
-// Version: 3.1.0
+// Version: 3.2.0
 // Why: Phase 3 - Use yt-dlp for reliable video extraction
-// Changelog: Removed deprecated youtubeSkipDashManifest, added Instagram cookie support
+// Changelog: Use system yt-dlp via create() to fix python3-not-found on Cloud Run
 // Env / Identity: Helper layer
 // ============================================================================
 
-const youtubedl = require('youtube-dl-exec');
+const { create } = require('youtube-dl-exec');
 const path = require('path');
+
+// Use the system yt-dlp binary (installed via pip in Dockerfile).
+// Falls back to 'yt-dlp' in PATH if YTDLP_PATH is not set (local dev).
+const youtubedl = create(process.env.YTDLP_PATH || 'yt-dlp');
 
 /**
  * Interface definition:
