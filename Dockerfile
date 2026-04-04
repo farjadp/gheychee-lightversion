@@ -9,11 +9,12 @@
 # 1. Base image: Node.js 18 on Debian slim
 FROM node:18-slim
 
-# 2. Install system dependencies: Python 3, pip, ffmpeg
+# 2. Install system dependencies: Python 3, pip, ffmpeg, chromium
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
     ffmpeg \
+    chromium \
     ca-certificates \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -41,6 +42,7 @@ ENV NODE_ENV=production
 ENV PORT=3000
 # Tell youtube-dl-exec to use the system yt-dlp installed via pip
 ENV YTDLP_PATH=/usr/local/bin/yt-dlp
+ENV INSTAGRAM_CHROMIUM_PATH=/usr/bin/chromium
 
 # 10. Start
 CMD ["npm", "start"]

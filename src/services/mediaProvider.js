@@ -10,6 +10,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { create } = require('youtube-dl-exec');
+const { getInstagramMedia } = require('./instagramBrowserProvider');
 
 const DEFAULT_YTDLP_BINARY = 'yt-dlp';
 
@@ -126,6 +127,11 @@ const pickBestVideoUrl = (output) => {
  */
 const getMedia = async (url, platform) => {
     console.log(`[MediaProvider] Phase 3 Extraction for ${platform}: ${url}`);
+
+    if (platform === 'INSTAGRAM') {
+        return getInstagramMedia(url);
+    }
+
     const ytdlpBinaryPath = getYtDlpBinaryPath();
     const youtubedl = create(ytdlpBinaryPath);
 
