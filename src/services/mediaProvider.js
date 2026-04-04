@@ -6,12 +6,111 @@
 // Env / Identity: Helper layer
 // ============================================================================
 
-const { create } = require('youtube-dl-exec');
+const fs = require('fs');
+const os = require('os');
 const path = require('path');
+const { create } = require('youtube-dl-exec');
 
-// Use the system yt-dlp binary (installed via pip in Dockerfile).
-// Falls back to 'yt-dlp' in PATH if YTDLP_PATH is not set (local dev).
-const youtubedl = create(process.env.YTDLP_PATH || 'yt-dlp');
+const DEFAULT_YTDLP_BINARY = 'yt-dlp';
+
+const isExecutableFile = (filePath) => {
+    if (!filePath) {
+        return false;
+    }
+
+    try {
+        fs.accessSync(filePath, fs.constants.X_OK);
+        return true;
+    } catch (_) {
+        return false;
+    }
+};
+
+const getMacUserBaseCandidates = () => {
+    const pythonRoot = path.join(os.homedir(), 'Library', 'Python');
+    if (!fs.existsSync(pythonRoot)) {
+        return [];
+    }
+
+    try {
+        return fs.readdirSync(pythonRoot, { withFileTypes: true })
+            .filter((entry) => entry.isDirectory())
+            .map((entry) => path.join(pythonRoot, entry.name, 'bin', DEFAULT_YTDLP_BINARY));
+    } catch (_) {
+        return [];
+    }
+};
+
+const getYtDlpBinaryPath = () => {
+    const candidates = [
+        process.env.YTDLP_PATH,
+        path.join(os.homedir(), '.local', 'bin', DEFAULT_YTDLP_BINARY),
+        ...getMacUserBaseCandidates(),
+        '/usr/local/bin/yt-dlp',
+        '/opt/homebrew/bin/yt-dlp',
+        '/usr/bin/yt-dlp'
+    ].filter(Boolean);
+
+    const discoveredPath = [...new Set(candidates)].find(isExecutableFile);
+    return discoveredPath || process.env.YTDLP_PATH || DEFAULT_YTDLP_BINARY;
+};
+
+const isBinaryMissingError = (error, binaryPath) => {
+    const diagnostic = [
+        error.code,
+        error.message,
+        error.stderr,
+        error.syscall,
+        error.path,
+        binaryPath
+    ].filter(Boolean).join(' ');
+
+    return error.code === 'ENOENT' ||
+        error.errno === -2 ||
+        error.path === binaryPath ||
+        /enoent|not found|spawn .*yt-dlp/i.test(diagnostic);
+};
+
+const pickBestVideoUrl = (output) => {
+    if (!output || typeof output !== 'object') {
+        return null;
+    }
+
+    if (output.url) {
+        return output.url;
+    }
+
+    if (Array.isArray(output.requested_downloads)) {
+        const requestedDownload = output.requested_downloads.find((download) => download && download.url);
+        if (requestedDownload) {
+            return requestedDownload.url;
+        }
+    }
+
+    if (Array.isArray(output.formats)) {
+        const bestFormat = [...output.formats].reverse().find((format) =>
+            format.ext === 'mp4' &&
+            format.acodec !== 'none' &&
+            format.vcodec !== 'none' &&
+            format.url
+        );
+
+        if (bestFormat) {
+            return bestFormat.url;
+        }
+    }
+
+    if (Array.isArray(output.entries)) {
+        for (const entry of output.entries) {
+            const entryUrl = pickBestVideoUrl(entry);
+            if (entryUrl) {
+                return entryUrl;
+            }
+        }
+    }
+
+    return null;
+};
 
 /**
  * Interface definition:
@@ -27,6 +126,8 @@ const youtubedl = create(process.env.YTDLP_PATH || 'yt-dlp');
  */
 const getMedia = async (url, platform) => {
     console.log(`[MediaProvider] Phase 3 Extraction for ${platform}: ${url}`);
+    const ytdlpBinaryPath = getYtDlpBinaryPath();
+    const youtubedl = create(ytdlpBinaryPath);
 
     try {
         // 1. Build yt-dlp options
@@ -63,16 +164,7 @@ const getMedia = async (url, platform) => {
         // The 'url' field in yt-dlp JSON is usually the direct video link (if single file)
         // or we might need to look at 'formats' if 'url' is missing.
         // For simple usage, 'url' or 'requested_downloads[0].url' is best.
-        let videoUrl = output.url;
-
-        // If top-level url is missing, try to find the best format
-        if (!videoUrl && output.formats) {
-            // Simple heuristic: Get best mp4 with audio
-            const bestFormat = output.formats.reverse().find(f => f.ext === 'mp4' && f.acodec !== 'none' && f.vcodec !== 'none');
-            if (bestFormat) {
-                videoUrl = bestFormat.url;
-            }
-        }
+        const videoUrl = pickBestVideoUrl(output);
 
         if (!videoUrl) {
             throw new Error('yt-dlp could not find a direct video URL.');
@@ -112,14 +204,14 @@ X: https://x.com/ashavidgroup
         // Capture full error details including yt-dlp stderr
         const msg = error.message || '';
         const stderr = error.stderr || '';
-        const fullError = [msg, stderr].filter(Boolean).join(' | ');
+        const fullError = [msg, stderr, error.code, error.syscall, error.path].filter(Boolean).join(' | ');
         console.error(`[MediaProvider] Error:`, fullError);
-        console.error(`[MediaProvider] ytdlp binary: ${process.env.YTDLP_PATH || 'yt-dlp (fallback)'}`);
+        console.error(`[MediaProvider] ytdlp binary: ${ytdlpBinaryPath}`);
         console.error(`[MediaProvider] cookies file: ${process.env.INSTAGRAM_COOKIES_FILE || 'not set'}`);
 
         // Binary not found
-        if (msg.includes('ENOENT') || msg.includes('not found')) {
-            throw new Error(`Failed to download media: yt-dlp binary not found at ${process.env.YTDLP_PATH || 'yt-dlp'}`);
+        if (isBinaryMissingError(error, ytdlpBinaryPath)) {
+            throw new Error(`Failed to download media: yt-dlp binary not found at ${ytdlpBinaryPath}`);
         }
 
         // Instagram authentication issues
@@ -136,5 +228,10 @@ X: https://x.com/ashavidgroup
 };
 
 module.exports = {
-    getMedia
+    getMedia,
+    _internal: {
+        getYtDlpBinaryPath,
+        isBinaryMissingError,
+        pickBestVideoUrl
+    }
 };
